@@ -1,0 +1,35 @@
+{
+  "name": "hy-fullstack2019-blogilista-backend",
+  "version": "1.0.0",
+  "description": "Backend for project \"blogilista\"",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "watch": "nodemon index.js",
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "lint": "eslint ."
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Jarppex/HY-fullstack2019-blogilista-backend.git"
+  },
+  "author": "Janne Mäkelä",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/Jarppex/HY-fullstack2019-blogilista-backend/issues"
+  },
+  "homepage": "https://github.com/Jarppex/HY-fullstack2019-blogilista-backend#readme",
+  "dependencies": {
+    "cors": "^2.8.5",
+    "dotenv": "^8.0.0",
+    "express": "^4.16.4",
+    "mongoose": "^5.5.7",
+    "mongoose-unique-validator": "^2.0.3"
+  },
+  "devDependencies": {
+    "eslint": "^5.16.0",
+    "eslint-plugin-react": "^7.13.0",
+    "morgan": "^1.9.1",
+    "nodemon": "^1.19.0"
+  }
+}
