@@ -19,9 +19,34 @@ const favoriteBlog = (blogs) => {
         return previous.likes > current.likes ? previous : current
     })
 }
+
+const mostBlogs = (blogs) => {
+
+    if (blogs.length === 0) {
+        return undefined
+    }
+    return blogs
+        .reduce((previous, current) => {
+
+            const sameAuthor = blog => blog.author === current.author
+            const author = previous.find(sameAuthor)
+
+            if (previous.length === 0 || author === undefined) {
+                previous.push({author: current.author, blogs: 1})
+            }
+            else {
+                author.blogs += 1
+            }
+            return previous
+        }, [])
+        .reduce((previous, current) => {
+            return previous.blogs > current.blogs ? previous : current
+        })
+}
   
   module.exports = {
     dummy,
     totalLikes,
-    favoriteBlog
+    favoriteBlog,
+    mostBlogs
   }

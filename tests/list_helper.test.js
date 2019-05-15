@@ -1,4 +1,4 @@
-const testData = require('../utils/test_blog_data')
+const testData = require('../utils/blogs_testdata')
 const listHelper = require('../utils/list_helper')
 
 test('dummy returns one', () => {
@@ -42,4 +42,24 @@ describe('favorite blog', () => {
         const result = listHelper.favoriteBlog(testData.blogs)
         expect(result).toEqual(testData.blogs[2])
     })
+})
+
+describe('author with most blogs', () => {
+
+  test('of empty list is undefined', () => {
+      const result = listHelper.mostBlogs(testData.listWithNoBlogs)
+      expect(result).toEqual(undefined)
+  })
+
+  test('when list has only one blog is that one', () => {
+    const result = listHelper.mostBlogs(testData.listWithOneBlog)
+    const expected = { author: "Edsger W. Dijkstra", blogs: 1 }
+    expect(result).toEqual(expected)
+  })
+
+  test('of a bigger list is one with most blogs', () => {
+      const result = listHelper.mostBlogs(testData.blogs)
+      const expected = { author: "Robert C. Martin", blogs: 3 }
+      expect(result).toEqual(expected)
+  })
 })
