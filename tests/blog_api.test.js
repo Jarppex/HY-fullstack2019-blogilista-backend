@@ -15,7 +15,7 @@ beforeEach(async () => {
   }
 })
 
-describe('GET', () => {
+describe('GET: blogs', () => {
 
   test('blogs are returned as json', async () => {
     await api
@@ -31,8 +31,8 @@ describe('GET', () => {
 
   test('the first blog is about react patterns', async () => {
     const response = await api.get('/api/blogs')
-    const contents = response.body.map(r => r.title)
-    expect(contents).toContain('React patterns')
+    const titles = response.body.map(r => r.title)
+    expect(titles).toContain('React patterns')
   })
 
   test('a blog has identifying field "id"', async () => {
@@ -41,7 +41,41 @@ describe('GET', () => {
   })
 })
 
-describe('POST', () => {
+describe('GET: a specific blog', () => {
+
+  test('a specific blog can be viewed', async () => {
+    const blogsAtStart = await helper.blogsInDb()
+    const blogToView = blogsAtStart[0]
+    blogToView.id = blogToView.id.toString()
+
+    const resultBlog = await api
+      .get(`/api/blogs/${blogToView.id}`)
+      .expect(200)
+      .expect('Content-Type', /application\/json/)
+
+    expect(resultBlog.body).toEqual(blogToView)
+  })
+
+  test('fails with statuscode 404 if blog does not exist', async () => {
+    const validNonexistingId = await helper.nonExistingId()
+
+    console.log(validNonexistingId)
+
+    await api
+      .get(`/api/blogs/${validNonexistingId}`)
+      .expect(404)
+  })
+
+  test('fails with statuscode 400 if id is invalid', async () => {
+    const invalidId = '5a3d5da59070081a82a3445'
+
+    await api
+      .get(`/api/blogs/${invalidId}`)
+      .expect(400)
+  })
+})
+
+describe('POST: blogs', () => {
 
   test('a valid blog can be added', async () => {
     const newBlog = {
@@ -59,8 +93,8 @@ describe('POST', () => {
     const blogsAtEnd = await helper.blogsInDb()
     expect(blogsAtEnd.length).toBe(testData.blogs.length + 1)
 
-    const contents = blogsAtEnd.map(n => n.title)
-    expect(contents).toContain(newBlog.title)
+    const titles = blogsAtEnd.map(n => n.title)
+    expect(titles).toContain(newBlog.title)
   })
 
   test('blog without likes gets default value 0', async () => {
@@ -111,39 +145,24 @@ describe('POST', () => {
     expect(blogsAtEnd.length).toBe(testData.blogs.length)
   })
 })
-/*
-test('a specific note can be viewed', async () => { //KESKEN
-  const notesAtStart = await helper.notesInDb()
 
-  const noteToView = notesAtStart[0]
+describe('DELETE: a specific blog', () => {
 
-  const resultNote = await api
-    .get(`/api/notes/${noteToView.id}`)
-    .expect(200)
-    .expect('Content-Type', /application\/json/)
+  test('a blog can be deleted', async () => {
+    const blogsAtStart = await helper.blogsInDb()
+    const blogToDelete = blogsAtStart[0]
 
-  expect(resultNote.body).toEqual(noteToView)
+    await api
+      .delete(`/api/blogs/${blogToDelete.id}`)
+      .expect(204)
+
+    const blogsAtEnd = await helper.blogsInDb()
+    expect(blogsAtEnd.length).toBe(testData.blogs.length - 1)
+
+    const titles = blogsAtEnd.map(r => r.title)
+    expect(titles).not.toContain(blogToDelete.title)
+  })
 })
-
-test('a note can be deleted', async () => { //KESKEN
-  const notesAtStart = await helper.notesInDb()
-  const noteToDelete = notesAtStart[0]
-
-  await api
-    .delete(`/api/notes/${noteToDelete.id}`)
-    .expect(204)
-
-  const notesAtEnd = await helper.notesInDb()
-
-  expect(notesAtEnd.length).toBe(
-    helper.initialNotes.length - 1
-  )
-
-  const contents = notesAtEnd.map(r => r.content)
-
-  expect(contents).not.toContain(noteToDelete.content)
-})
-*/
 
 afterAll(() => {
   mongoose.connection.close()
