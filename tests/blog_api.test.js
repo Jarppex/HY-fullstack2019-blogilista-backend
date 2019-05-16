@@ -164,6 +164,31 @@ describe('DELETE: a specific blog', () => {
   })
 })
 
+describe('PUT: a specific blog', () => {
+
+  test('blogs likes can be changed', async () => {
+    const blogsAtStart = await helper.blogsInDb()
+    const blogTochange = blogsAtStart[0]
+
+    const newBlog = {
+      _id: "5a422a851b54a676234d17f7",
+      title: "React patterns",
+      author: "Michael Chan",
+      url: "https://reactpatterns.com/",
+      likes: 55,
+      __v: 0
+    }
+    await api
+      .put(`/api/blogs/${blogTochange.id}`)
+      .send(newBlog)
+      .expect(200)
+
+    const blogsAtEnd = await helper.blogsInDb()
+    expect(blogsAtEnd.length).toBe(testData.blogs.length)
+    expect(blogsAtEnd[0].likes).toBe(newBlog.likes)
+  })
+})
+
 afterAll(() => {
   mongoose.connection.close()
 })
