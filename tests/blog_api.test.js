@@ -62,6 +62,22 @@ describe('POST', () => {
     const contents = blogsAtEnd.map(n => n.title)
     expect(contents).toContain(newBlog.title)
   })
+
+  test('blogs undefined "likes" gets default value "0"', async () => {
+    const newBlog = {
+      "title": "Unpopular blog",
+      "author": "Nobody",
+      "url": "www.nothingtoseehere.com",
+    }
+    await api
+      .post('/api/blogs')
+      .send(newBlog)
+      .expect(201)
+      .expect('Content-Type', /application\/json/)
+
+    const blogsAtEnd = await helper.blogsInDb()
+    expect(blogsAtEnd[blogsAtEnd.length - 1].likes).toBe(0)
+  })
 })
 /*
 test('note without content is not added', async () => { //KESKEN
