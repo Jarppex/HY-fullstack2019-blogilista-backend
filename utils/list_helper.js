@@ -1,77 +1,72 @@
-const dummy = (blogs) => {
-    return 1
-}
-
 const totalLikes = (blogs) => {
 
-    if (blogs.length === 0) {
-        return 0
-    }
-    return blogs.reduce(((allLikes, blog) => allLikes + blog.likes), 0)
+  if (blogs.length === 0) {
+    return 0
+  }
+  return blogs.reduce(((allLikes, blog) => allLikes + blog.likes), 0)
 }
 
 const favoriteBlog = (blogs) => {
 
-    if (blogs.length === 0) {
-        return undefined
-    }
-    return blogs.reduce((previous, current) => {
-        return previous.likes > current.likes ? previous : current
-    })
+  if (blogs.length === 0) {
+    return undefined
+  }
+  return blogs.reduce((previous, current) => {
+    return previous.likes > current.likes ? previous : current
+  })
 }
 
 const mostBlogs = (blogs) => {
 
-    if (blogs.length === 0) {
-        return undefined
-    }
-    return blogs
-        .reduce((previous, current) => {
+  if (blogs.length === 0) {
+    return undefined
+  }
+  return blogs
+    .reduce((previous, current) => {
 
-            const sameAuthor = blog => blog.author === current.author
-            const author = previous.find(sameAuthor)
+      const sameAuthor = blog => blog.author === current.author
+      const author = previous.find(sameAuthor)
 
-            if (previous.length === 0 || author === undefined) {
-                previous.push({author: current.author, blogs: 1})
-            }
-            else {
-                author.blogs += 1
-            }
-            return previous
-        }, [])
-        .reduce((previous, current) => {
-            return previous.blogs > current.blogs ? previous : current
-        })
+      if (previous.length === 0 || author === undefined) {
+        previous.push({ author: current.author, blogs: 1 })
+      }
+      else {
+        author.blogs += 1
+      }
+      return previous
+    }, [])
+    .reduce((previous, current) => {
+      return previous.blogs > current.blogs ? previous : current
+    })
 }
 
 const mostLikes = (blogs) => {
 
-    if (blogs.length === 0) {
-        return undefined
-    }
-    return blogs
-        .reduce((previous, current) => {
-
-            const sameAuthor = blog => blog.author === current.author
-            const author = previous.find(sameAuthor)
-
-            if (previous.length === 0 || author === undefined) {
-                previous.push({author: current.author, likes: current.likes})
-            }
-            else {
-                author.likes += current.likes
-            }
-            return previous
-        }, [])
-        .reduce((previous, current) => {
-            return previous.likes > current.likes ? previous : current
-        })
-}
-  
-  module.exports = {
-    dummy,
-    totalLikes,
-    favoriteBlog,
-    mostBlogs,
-    mostLikes
+  if (blogs.length === 0) {
+    return undefined
   }
+  return blogs
+    .reduce((previous, current) => {
+
+      const sameAuthor = blog => blog.author === current.author
+      const author = previous.find(sameAuthor)
+
+      if (previous.length === 0 || author === undefined) {
+        previous.push({ author: current.author, likes: current.likes })
+      }
+      else {
+        author.likes += current.likes
+      }
+      return previous
+    }, [])
+    .reduce((previous, current) => {
+      return previous.likes > current.likes ? previous : current
+    })
+}
+
+module.exports = {
+  totalLikes,
+  favoriteBlog,
+  mostBlogs,
+  mostLikes
+}
