@@ -11,10 +11,11 @@ blogsRouter.get('/', async (request, response, next) => {
 })
 
 blogsRouter.post('/', async (request, response, next) => {
-  console.log(request.body.likes)
-  if (request.body.likes === undefined) {
+  if (!request.body.likes) {
     request.body.likes = 0
-    console.log(request.body.likes)
+  }
+  if (!request.body.title || !request.body.url) {
+    return response.status(400).json({ error: 'content missing' })
   }
   const blog = new Blog(request.body)
   try {

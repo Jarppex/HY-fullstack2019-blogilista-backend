@@ -63,7 +63,7 @@ describe('POST', () => {
     expect(contents).toContain(newBlog.title)
   })
 
-  test('blogs undefined "likes" gets default value "0"', async () => {
+  test('blog without likes gets default value 0', async () => {
     const newBlog = {
       "title": "Unpopular blog",
       "author": "Nobody",
@@ -78,23 +78,40 @@ describe('POST', () => {
     const blogsAtEnd = await helper.blogsInDb()
     expect(blogsAtEnd[blogsAtEnd.length - 1].likes).toBe(0)
   })
+
+  test('blog without title or url is not added', async () => {
+    const newBlogs = [
+      {
+        "author": "Nobody",
+      },
+      {
+        "author": "Nobody",
+        "url": "www.nothingtoseehere2.com",
+      },
+      {
+        "title": "Unpopular blog3",
+        "author": "Nobody",
+        "likes": 2
+      }
+    ]
+    await api
+      .post('/api/blogs')
+      .send(newBlogs[0])
+      .expect(400)
+    await api
+      .post('/api/blogs')
+      .send(newBlogs[1])
+      .expect(400)
+    await api
+      .post('/api/blogs')
+      .send(newBlogs[2])
+      .expect(400)
+
+    const blogsAtEnd = await helper.blogsInDb()
+    expect(blogsAtEnd.length).toBe(testData.blogs.length)
+  })
 })
 /*
-test('note without content is not added', async () => { //KESKEN
-  const newNote = {
-    important: true
-  }
-
-  await api
-    .post('/api/notes')
-    .send(newNote)
-    .expect(400)
-
-  const notesAtEnd = await helper.notesInDb()
-
-  expect(notesAtEnd.length).toBe(helper.initialNotes.length)
-})
-
 test('a specific note can be viewed', async () => { //KESKEN
   const notesAtStart = await helper.notesInDb()
 
