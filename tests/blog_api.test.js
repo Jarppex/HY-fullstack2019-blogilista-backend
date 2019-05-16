@@ -1,6 +1,6 @@
 const mongoose = require('mongoose')
 const supertest = require('supertest')
-//const helper = require('./test_helper') //KESKEN
+const helper = require('../utils/test_helper')
 const testData = require('../utils/blogs_testdata')
 const app = require('../app')
 const api = supertest(app)
@@ -15,51 +15,55 @@ beforeEach(async () => {
   }
 })
 
-test('blogs are returned as json', async () => {
-  await api
-    .get('/api/blogs')
-    .expect(200)
-    .expect('Content-Type', /application\/json/)
+describe('GET', () => {
+
+  test('blogs are returned as json', async () => {
+    await api
+      .get('/api/blogs')
+      .expect(200)
+      .expect('Content-Type', /application\/json/)
+  })
+
+  test('all blogs are returned', async () => {
+    const response = await api.get('/api/blogs')
+    expect(response.body.length).toBe(testData.blogs.length)
+  })
+
+  test('the first blog is about react patterns', async () => {
+    const response = await api.get('/api/blogs')
+    const contents = response.body.map(r => r.title)
+    expect(contents).toContain('React patterns')
+  })
+
+  test('a blog has identifying field "id"', async () => {
+    const response = await api.get('/api/blogs')
+    expect(response.body[0].id).toBeDefined()
+  })
 })
 
-test('all blogs are returned', async () => {
-  const response = await api.get('/api/blogs')
-  expect(response.body.length).toBe(testData.blogs.length)
-})
+describe('POST', () => {
 
-test('the first blog is about react patterns', async () => {
-  const response = await api.get('/api/blogs')
-  const contents = response.body.map(r => r.title)
-  expect(contents).toContain('React patterns')
-})
+  test('a valid blog can be added', async () => {
+    const newBlog = {
+      "title": "Perunateatterit",
+      "author": "Helena",
+      "url": "www.perunateatterit.fi",
+      "likes": 9
+    }
+    await api
+      .post('/api/blogs')
+      .send(newBlog)
+      .expect(201)
+      .expect('Content-Type', /application\/json/)
 
-test('a blog has identifying field "id"', async () => {
-  const response = await api.get('/api/blogs')
-  expect(response.body[0].id).toBeDefined()
-})
+    const blogsAtEnd = await helper.blogsInDb()
+    expect(blogsAtEnd.length).toBe(testData.blogs.length + 1)
 
+    const contents = blogsAtEnd.map(n => n.title)
+    expect(contents).toContain(newBlog.title)
+  })
+})
 /*
-test('a valid note can be added ', async () => { //KESKEN
-  const newNote = {
-    content: 'async/await yksinkertaistaa asynkronisten funktioiden kutsua',
-    important: true,
-  }
-
-  await api
-    .post('/api/notes')
-    .send(newNote)
-    .expect(200)
-    .expect('Content-Type', /application\/json/)
-
-  const notesAtEnd = await helper.notesInDb()
-  expect(notesAtEnd.length).toBe(helper.initialNotes.length + 1)
-
-  const contents = notesAtEnd.map(n => n.content)
-  expect(contents).toContain(
-    'async/await yksinkertaistaa asynkronisten funktioiden kutsua'
-  )
-})
-
 test('note without content is not added', async () => { //KESKEN
   const newNote = {
     important: true
