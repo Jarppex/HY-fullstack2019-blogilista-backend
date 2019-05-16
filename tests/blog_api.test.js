@@ -33,6 +33,11 @@ test('the first blog is about react patterns', async () => {
   expect(contents).toContain('React patterns')
 })
 
+test('a blog has identifying field "id"', async () => {
+  const response = await api.get('/api/blogs')
+  expect(response.body[0].id).toBeDefined()
+})
+
 /*
 test('a valid note can be added ', async () => { //KESKEN
   const newNote = {
