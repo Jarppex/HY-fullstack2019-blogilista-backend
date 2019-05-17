@@ -7,7 +7,8 @@
     "start": "cross-env NODE_ENV=production node index.js",
     "watch": "cross-env NODE_ENV=development nodemon index.js",
     "test": "cross-env NODE_ENV=test jest --verbose --runInBand",
-    "api-test": "cross-env NODE_ENV=test npx jest tests/blog_api.test.js --verbose --runInBand",
+    "blog-api-test": "cross-env NODE_ENV=test npx jest tests/blog_api.test.js --verbose --runInBand",
+    "user-api-test": "cross-env NODE_ENV=test npx jest tests/user_api.test.js --verbose --runInBand",
     "lint": "eslint ."
   },
   "jest": {
@@ -24,9 +25,11 @@
   },
   "homepage": "https://github.com/Jarppex/HY-fullstack2019-blogilista-backend#readme",
   "dependencies": {
+    "bcrypt": "^3.0.6",
     "cors": "^2.8.5",
     "dotenv": "^8.0.0",
     "express": "^4.16.4",
+    "jsonwebtoken": "^8.5.1",
     "mongoose": "^5.5.7",
     "mongoose-unique-validator": "^2.0.3"
   },
