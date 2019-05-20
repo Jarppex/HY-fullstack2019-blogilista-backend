@@ -1,7 +1,7 @@
 const blogsRouter = require('express').Router()
 const Blog = require('../models/blog')
 const User = require('../models/user')
-//const jwt = require('jsonwebtoken')
+const jwt = require('jsonwebtoken')
 
 blogsRouter.get('/', async (request, response, next) => {
   try {
@@ -25,14 +25,17 @@ blogsRouter.get('/:id', async (request, response, next) => {
     next(exception)
   }
 })
+
 /*
 const getTokenFrom = request => {
   const authorization = request.get('authorization')
+  console.log('authorization on tämmönen:', authorization)
   if (authorization && authorization.toLowerCase().startsWith('bearer ')) {
     return authorization.substring(7)
   }
   return null
-}*/
+}
+*/
 
 blogsRouter.post('/', async (request, response, next) => {
   if (!request.body.likes) {
@@ -42,13 +45,16 @@ blogsRouter.post('/', async (request, response, next) => {
     return response.status(400).json({ error: 'content missing' })
   }
   //const token = getTokenFrom(request)
-  try {/*
+  const token = request.get('authorization')
+  console.log('Tokeni on ===', token)
+  try {
     const decodedToken = jwt.verify(token, process.env.SECRET)
+    console.log('Dekoodattu tokeni on ===', decodedToken)
     if (!token || !decodedToken.id) {
+      console.log('Ei löytyny tokeneita...')
       return response.status(401).json({ error: 'token missing or invalid' })
-    }*/
+    }
     let user
-    //console.log('request.body.userId:', request.body.user)
     if (request.body.user) {
       user = await User.findById(request.body.user)
       console.log('found user by ID:', user)
@@ -57,8 +63,7 @@ blogsRouter.post('/', async (request, response, next) => {
     const savedBlog = await blog.save()
     console.log('savedBlog:', savedBlog)
     if (user) {
-      //console.log('savedBlog._id:', savedBlog._id)
-      user.blogs = user.blogs.concat(savedBlog._id) //Tarkista
+      user.blogs = user.blogs.concat(savedBlog._id)
       await user.save()
       console.log('user:', user)
     }

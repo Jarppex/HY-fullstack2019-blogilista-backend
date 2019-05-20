@@ -1,8 +1,9 @@
 POST http://localhost:3003/api/blogs/
 Content-Type: application/json
+Authorization: "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6IkphcnBwZVgiLCJpZCI6IjVjZGU5ZWFjNGI1N2M4MzRhMGE3Nzk3YyIsImlhdCI6MTU1ODM1Nzc4NH0.X1I5UZ6zECfpCQA6hKnnX7w4ROGYXyfk-1bDLZUedtw"
 
 {
-  "title": "Perunateatterit",
+  "title": "Lauluja",
   "author": "Helena",
   "url": "www.perunateatterit.fi",
   "likes": 9,

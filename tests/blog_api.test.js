@@ -10,7 +10,8 @@ const User = require('../models/user')
 beforeEach(async () => {
 
   await User.deleteMany({})
-  const user = new User({ username: 'root', password: 'sekret' })
+  const user = new User(
+    { username: "root", password: "sekret" })
   await user.save()
 
   await Blog.remove({})
@@ -83,21 +84,43 @@ describe('GET: a specific blog', () => {
 describe('POST: blogs', () => {
 
   test('a valid blog can be added', async () => {
-    const users = await User.find({})
-    const userToPostBlog = users[0] // TULEE MUUTTUMAAN
+    const newUser = {
+      "username": "Tarmo",
+      "password": "salis123"
+    }
+    await api
+      .post('/api/users')
+      .send(newUser)
+      .expect(200)
+      .expect('Content-Type', /application\/json/)
+    console.log('Käyttäjä lisätty!! =', newUser)
+    const loggedInUser = await api
+      .post('/api/login')
+      .send(newUser)
+      .expect(200)
+      .expect('Content-Type', /application\/json/)
+    console.log('Käyttäjän sisäänkirjautuminen onnistui!! =', loggedInUser.body)
+
+    const allUsers = await helper.usersInDb()
+    const userToPostBlog = allUsers.find(user => {
+      return user.username === loggedInUser.body.username
+    })
+    console.log('Blogin lisäävä käyttäjä on ==', userToPostBlog)
 
     const newBlog = {
       "title": "Perunateatterit",
       "author": "Helena",
       "url": "www.perunateatterit.fi",
       "likes": 9,
-      "user": userToPostBlog._id
+      "user": userToPostBlog.id
     }
     await api
       .post('/api/blogs')
       .send(newBlog)
+      .set({ Authorization: loggedInUser.body.token })
       .expect(201)
       .expect('Content-Type', /application\/json/)
+    console.log('Käyttäjä lisäsi blogin!! =', newBlog)
 
     const blogsAtEnd = await helper.blogsInDb()
     expect(blogsAtEnd.length).toBe(testData.blogs.length + 1)
@@ -112,18 +135,39 @@ describe('POST: blogs', () => {
   })
 
   test('blog without likes gets default value 0', async () => {
-    const users = await User.find({})
-    const userToPostBlog = users[0] // TULEE MUUTTUMAAN
+    const newUser = {
+      "username": "Tarmo",
+      "password": "salis123"
+    }
+    await api
+      .post('/api/users')
+      .send(newUser)
+      .expect(200)
+      .expect('Content-Type', /application\/json/)
+    console.log('Käyttäjä lisätty!! =', newUser)
+    const loggedInUser = await api
+      .post('/api/login')
+      .send(newUser)
+      .expect(200)
+      .expect('Content-Type', /application\/json/)
+    console.log('Käyttäjän sisäänkirjautuminen onnistui!! =', loggedInUser.body)
+
+    const allUsers = await helper.usersInDb()
+    const userToPostBlog = allUsers.find(user => {
+      return user.username === loggedInUser.body.username
+    })
+    console.log('Blogin lisäävä käyttäjä on ==', userToPostBlog)
 
     const newBlog = {
       "title": "Unpopular blog",
       "author": "Nobody",
       "url": "www.nothingtoseehere.com",
-      "user": userToPostBlog._id
+      "user": userToPostBlog.id
     }
     await api
       .post('/api/blogs')
       .send(newBlog)
+      .set({ Authorization: loggedInUser.body.token })
       .expect(201)
       .expect('Content-Type', /application\/json/)
 
@@ -139,37 +183,60 @@ describe('POST: blogs', () => {
   })
 
   test('blog without title or url is not added', async () => {
-    const users = await User.find({})
-    const userToPostBlog = users[0] // TULEE MUUTTUMAAN
+    const newUser = {
+      "username": "Tarmo",
+      "password": "salis123"
+    }
+    await api
+      .post('/api/users')
+      .send(newUser)
+      .expect(200)
+      .expect('Content-Type', /application\/json/)
+    console.log('Käyttäjä lisätty!! =', newUser)
+    const loggedInUser = await api
+      .post('/api/login')
+      .send(newUser)
+      .expect(200)
+      .expect('Content-Type', /application\/json/)
+    console.log('Käyttäjän sisäänkirjautuminen onnistui!! =', loggedInUser.body)
+
+    const allUsers = await helper.usersInDb()
+    const userToPostBlog = allUsers.find(user => {
+      return user.username === loggedInUser.body.username
+    })
+    console.log('Blogin lisäävä käyttäjä on ==', userToPostBlog)
 
     const newBlogs = [
       {
         "author": "Nobody",
-        "user": userToPostBlog._id
+        "user": userToPostBlog.id
       },
       {
         "author": "Nobody",
         "url": "www.nothingtoseehere2.com",
-        "user": userToPostBlog._id
+        "user": userToPostBlog.id
       },
       {
         "title": "Unpopular blog3",
         "author": "Nobody",
         "likes": 2,
-        "user": userToPostBlog._id
+        "user": userToPostBlog.id
       }
     ]
     await api
       .post('/api/blogs')
       .send(newBlogs[0])
+      .set({ Authorization: loggedInUser.body.token })
       .expect(400)
     await api
       .post('/api/blogs')
       .send(newBlogs[1])
+      .set({ Authorization: loggedInUser.body.token })
       .expect(400)
     await api
       .post('/api/blogs')
       .send(newBlogs[2])
+      .set({ Authorization: loggedInUser.body.token })
       .expect(400)
 
     const blogsAtEnd = await helper.blogsInDb()

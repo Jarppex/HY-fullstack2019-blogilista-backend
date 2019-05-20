@@ -18,6 +18,7 @@ const errorHandler = (error, request, response, next) => {
   } else if (error.name === 'ValidationError') {
     return response.status(400).json({ error: error.message })
   } else if (error.name === 'JsonWebTokenError') {
+    console.log('Virhettä pukkaa!! == JsonWebTokenError')
     return response.status(401).json({ error: 'invalid token' })
   }
   if (error.message) {
