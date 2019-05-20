@@ -5,10 +5,15 @@ const testData = require('../utils/blogs_testdata')
 const app = require('../app')
 const api = supertest(app)
 const Blog = require('../models/blog')
+const User = require('../models/user')
 
 beforeEach(async () => {
-  await Blog.remove({})
 
+  await User.deleteMany({})
+  const user = new User({ username: 'root', password: 'sekret' })
+  await user.save()
+
+  await Blog.remove({})
   for (let blog of testData.blogs) {
     let blogObject = new Blog(blog)
     await blogObject.save()
@@ -78,11 +83,15 @@ describe('GET: a specific blog', () => {
 describe('POST: blogs', () => {
 
   test('a valid blog can be added', async () => {
+    const users = await User.find({})
+    const userToPostBlog = users[0] // TULEE MUUTTUMAAN
+
     const newBlog = {
       "title": "Perunateatterit",
       "author": "Helena",
       "url": "www.perunateatterit.fi",
-      "likes": 9
+      "likes": 9,
+      "user": userToPostBlog._id
     }
     await api
       .post('/api/blogs')
@@ -95,13 +104,22 @@ describe('POST: blogs', () => {
 
     const titles = blogsAtEnd.map(n => n.title)
     expect(titles).toContain(newBlog.title)
+
+    const usersBlog = blogsAtEnd.find(blog => {
+      return blog.title === newBlog.title
+    })
+    expect(usersBlog.user.toString()).toContain(newBlog.user.toString())
   })
 
   test('blog without likes gets default value 0', async () => {
+    const users = await User.find({})
+    const userToPostBlog = users[0] // TULEE MUUTTUMAAN
+
     const newBlog = {
       "title": "Unpopular blog",
       "author": "Nobody",
       "url": "www.nothingtoseehere.com",
+      "user": userToPostBlog._id
     }
     await api
       .post('/api/blogs')
@@ -111,21 +129,34 @@ describe('POST: blogs', () => {
 
     const blogsAtEnd = await helper.blogsInDb()
     expect(blogsAtEnd[blogsAtEnd.length - 1].likes).toBe(0)
+
+    expect(blogsAtEnd.length).toBe(testData.blogs.length + 1)
+
+    const usersBlog = blogsAtEnd.find(blog => {
+      return blog.title === newBlog.title
+    })
+    expect(usersBlog.user.toString()).toContain(newBlog.user.toString())
   })
 
   test('blog without title or url is not added', async () => {
+    const users = await User.find({})
+    const userToPostBlog = users[0] // TULEE MUUTTUMAAN
+
     const newBlogs = [
       {
         "author": "Nobody",
+        "user": userToPostBlog._id
       },
       {
         "author": "Nobody",
         "url": "www.nothingtoseehere2.com",
+        "user": userToPostBlog._id
       },
       {
         "title": "Unpopular blog3",
         "author": "Nobody",
-        "likes": 2
+        "likes": 2,
+        "user": userToPostBlog._id
       }
     ]
     await api

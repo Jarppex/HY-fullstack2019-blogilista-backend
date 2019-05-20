@@ -1,11 +1,12 @@
 const blogsRouter = require('express').Router()
 const Blog = require('../models/blog')
 const User = require('../models/user')
-const jwt = require('jsonwebtoken')
+//const jwt = require('jsonwebtoken')
 
 blogsRouter.get('/', async (request, response, next) => {
   try {
-    const blogs = await Blog.find({})
+    const blogs = await Blog
+      .find({}).populate('user', { username: 1, name: 1 })
     response.json(blogs)
   } catch(exception) {
     next(exception)
@@ -24,14 +25,14 @@ blogsRouter.get('/:id', async (request, response, next) => {
     next(exception)
   }
 })
-
+/*
 const getTokenFrom = request => {
   const authorization = request.get('authorization')
   if (authorization && authorization.toLowerCase().startsWith('bearer ')) {
     return authorization.substring(7)
   }
   return null
-}
+}*/
 
 blogsRouter.post('/', async (request, response, next) => {
   if (!request.body.likes) {
@@ -40,21 +41,26 @@ blogsRouter.post('/', async (request, response, next) => {
   if (!request.body.title || !request.body.url) {
     return response.status(400).json({ error: 'content missing' })
   }
-  const token = getTokenFrom(request)
-  try {
+  //const token = getTokenFrom(request)
+  try {/*
     const decodedToken = jwt.verify(token, process.env.SECRET)
     if (!token || !decodedToken.id) {
       return response.status(401).json({ error: 'token missing or invalid' })
-    }
+    }*/
     let user
-    if (request.body.userId) {
-      user = await User.findById(request.body.userId)
+    //console.log('request.body.userId:', request.body.user)
+    if (request.body.user) {
+      user = await User.findById(request.body.user)
+      console.log('found user by ID:', user)
     }
     const blog = new Blog(request.body)
     const savedBlog = await blog.save()
+    console.log('savedBlog:', savedBlog)
     if (user) {
+      //console.log('savedBlog._id:', savedBlog._id)
       user.blogs = user.blogs.concat(savedBlog._id) //Tarkista
       await user.save()
+      console.log('user:', user)
     }
     response.status(201).json(savedBlog)
   } catch(exception) {
