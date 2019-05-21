@@ -93,19 +93,19 @@ describe('POST: blogs', () => {
       .send(newUser)
       .expect(200)
       .expect('Content-Type', /application\/json/)
-    console.log('Käyttäjä lisätty!! =', newUser)
+    //console.log('Käyttäjä lisätty!! =', newUser)
     const loggedInUser = await api
       .post('/api/login')
       .send(newUser)
       .expect(200)
       .expect('Content-Type', /application\/json/)
-    console.log('Käyttäjän sisäänkirjautuminen onnistui!! =', loggedInUser.body)
+    //console.log('Käyttäjän sisäänkirjautuminen onnistui!! =', loggedInUser.body)
 
     const allUsers = await helper.usersInDb()
     const userToPostBlog = allUsers.find(user => {
       return user.username === loggedInUser.body.username
     })
-    console.log('Blogin lisäävä käyttäjä on ==', userToPostBlog)
+    //console.log('Blogin lisäävä käyttäjä on ==', userToPostBlog)
 
     const newBlog = {
       "title": "Perunateatterit",
@@ -120,7 +120,7 @@ describe('POST: blogs', () => {
       .set({ Authorization: loggedInUser.body.token })
       .expect(201)
       .expect('Content-Type', /application\/json/)
-    console.log('Käyttäjä lisäsi blogin!! =', newBlog)
+    //console.log('Käyttäjä lisäsi blogin!! =', newBlog)
 
     const blogsAtEnd = await helper.blogsInDb()
     expect(blogsAtEnd.length).toBe(testData.blogs.length + 1)
@@ -144,19 +144,19 @@ describe('POST: blogs', () => {
       .send(newUser)
       .expect(200)
       .expect('Content-Type', /application\/json/)
-    console.log('Käyttäjä lisätty!! =', newUser)
+    //console.log('Käyttäjä lisätty!! =', newUser)
     const loggedInUser = await api
       .post('/api/login')
       .send(newUser)
       .expect(200)
       .expect('Content-Type', /application\/json/)
-    console.log('Käyttäjän sisäänkirjautuminen onnistui!! =', loggedInUser.body)
+    //console.log('Käyttäjän sisäänkirjautuminen onnistui!! =', loggedInUser.body)
 
     const allUsers = await helper.usersInDb()
     const userToPostBlog = allUsers.find(user => {
       return user.username === loggedInUser.body.username
     })
-    console.log('Blogin lisäävä käyttäjä on ==', userToPostBlog)
+    //console.log('Blogin lisäävä käyttäjä on ==', userToPostBlog)
 
     const newBlog = {
       "title": "Unpopular blog",
@@ -192,19 +192,19 @@ describe('POST: blogs', () => {
       .send(newUser)
       .expect(200)
       .expect('Content-Type', /application\/json/)
-    console.log('Käyttäjä lisätty!! =', newUser)
+    //console.log('Käyttäjä lisätty!! =', newUser)
     const loggedInUser = await api
       .post('/api/login')
       .send(newUser)
       .expect(200)
       .expect('Content-Type', /application\/json/)
-    console.log('Käyttäjän sisäänkirjautuminen onnistui!! =', loggedInUser.body)
+    //console.log('Käyttäjän sisäänkirjautuminen onnistui!! =', loggedInUser.body)
 
     const allUsers = await helper.usersInDb()
     const userToPostBlog = allUsers.find(user => {
       return user.username === loggedInUser.body.username
     })
-    console.log('Blogin lisäävä käyttäjä on ==', userToPostBlog)
+    //console.log('Blogin lisäävä käyttäjä on ==', userToPostBlog)
 
     const newBlogs = [
       {
@@ -247,15 +247,62 @@ describe('POST: blogs', () => {
 describe('DELETE: a specific blog', () => {
 
   test('a blog can be deleted', async () => {
+    const newUser = {
+      "username": "Tarmo",
+      "password": "salis123"
+    }
+    await api
+      .post('/api/users')
+      .send(newUser)
+      .expect(200)
+      .expect('Content-Type', /application\/json/)
+    //console.log('Käyttäjä lisätty!! =', newUser)
+    const loggedInUser = await api
+      .post('/api/login')
+      .send(newUser)
+      .expect(200)
+      .expect('Content-Type', /application\/json/)
+    //console.log('Käyttäjän sisäänkirjautuminen onnistui!! =', loggedInUser.body)
+
+    const allUsers = await helper.usersInDb()
+    const userToPostBlog = allUsers.find(user => {
+      return user.username === loggedInUser.body.username
+    })
+    //console.log('Blogin lisäävä käyttäjä on ==', userToPostBlog)
+
+    const newBlog = {
+      "title": "Perunateatterit",
+      "author": "Helena",
+      "url": "www.perunateatterit.fi",
+      "likes": 9,
+      "user": userToPostBlog.id
+    }
+    await api
+      .post('/api/blogs')
+      .send(newBlog)
+      .set({ Authorization: loggedInUser.body.token })
+      .expect(201)
+      .expect('Content-Type', /application\/json/)
+    //console.log('Käyttäjä lisäsi blogin!! =', newBlog)
+
     const blogsAtStart = await helper.blogsInDb()
-    const blogToDelete = blogsAtStart[0]
+    const blogToDelete = blogsAtStart.find(blog => {
+      return blog.title === newBlog.title
+    })
+    //console.log('Blogia ollaan poistamassa!! =', blogToDelete)
 
     await api
       .delete(`/api/blogs/${blogToDelete.id}`)
+      .expect(401)
+    //console.log('Ei onnistunut!! =', blogToDelete)
+    await api
+      .delete(`/api/blogs/${blogToDelete.id}`)
+      .set({ Authorization: loggedInUser.body.token })
       .expect(204)
+    //console.log('Nyt onnistui!! =', blogToDelete)
 
     const blogsAtEnd = await helper.blogsInDb()
-    expect(blogsAtEnd.length).toBe(testData.blogs.length - 1)
+    expect(blogsAtEnd.length).toBe(blogsAtStart.length - 1)
 
     const titles = blogsAtEnd.map(r => r.title)
     expect(titles).not.toContain(blogToDelete.title)

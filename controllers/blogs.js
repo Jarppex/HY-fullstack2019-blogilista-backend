@@ -26,17 +26,6 @@ blogsRouter.get('/:id', async (request, response, next) => {
   }
 })
 
-/*
-const getTokenFrom = request => {
-  const authorization = request.get('authorization')
-  console.log('authorization on tämmönen:', authorization)
-  if (authorization && authorization.toLowerCase().startsWith('bearer ')) {
-    return authorization.substring(7)
-  }
-  return null
-}
-*/
-
 blogsRouter.post('/', async (request, response, next) => {
   if (!request.body.likes) {
     request.body.likes = 0
@@ -44,28 +33,27 @@ blogsRouter.post('/', async (request, response, next) => {
   if (!request.body.title || !request.body.url) {
     return response.status(400).json({ error: 'content missing' })
   }
-  //const token = getTokenFrom(request)
   const token = request.get('authorization')
-  console.log('Tokeni on ===', token)
+  //console.log('Tokeni on ===', token)
   try {
     const decodedToken = jwt.verify(token, process.env.SECRET)
-    console.log('Dekoodattu tokeni on ===', decodedToken)
+    //console.log('Dekoodattu tokeni on ===', decodedToken)
     if (!token || !decodedToken.id) {
-      console.log('Ei löytyny tokeneita...')
+      //console.log('Ei löytyny tokeneita...')
       return response.status(401).json({ error: 'token missing or invalid' })
     }
     let user
     if (request.body.user) {
       user = await User.findById(request.body.user)
-      console.log('found user by ID:', user)
+      //console.log('found user by ID:', user)
     }
     const blog = new Blog(request.body)
     const savedBlog = await blog.save()
-    console.log('savedBlog:', savedBlog)
+    //console.log('savedBlog:', savedBlog)
     if (user) {
       user.blogs = user.blogs.concat(savedBlog._id)
       await user.save()
-      console.log('user:', user)
+      //console.log('user:', user)
     }
     response.status(201).json(savedBlog)
   } catch(exception) {
@@ -75,6 +63,14 @@ blogsRouter.post('/', async (request, response, next) => {
 
 blogsRouter.delete('/:id', async (request, response, next) => {
   try {
+    const token = request.get('authorization')
+    //console.log('Tokeni on ===', token)
+    const decodedToken = jwt.verify(token, process.env.SECRET)
+    //console.log('Dekoodattu tokeni on ===', decodedToken)
+    if (!token || !decodedToken.id) {
+      //console.log('Ei löytyny tokeneita...')
+      return response.status(401).json({ error: 'token missing or invalid' })
+    }
     await Blog.findByIdAndRemove(request.params.id)
     response.status(204).end()
   } catch (exception) {
