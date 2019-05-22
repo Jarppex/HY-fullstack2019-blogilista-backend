@@ -27,13 +27,19 @@ blogsRouter.get('/:id', async (request, response, next) => {
 })
 
 blogsRouter.post('/', async (request, response, next) => {
-  if (!request.body.likes) {
-    request.body.likes = 0
+  const body = request.body
+  if (!body.likes) {
+    body.likes = 0
   }
-  if (!request.body.title || !request.body.url) {
+  if (!body.title || !body.url) {
     return response.status(400).json({ error: 'content missing' })
   }
-  const token = request.get('authorization')
+  let token = request.get('authorization')
+  //console.log('Tokeni on ===', token)
+  if (!token) {
+    token = body.token
+    //console.log('Tokeni on ===', token)
+  }
   //console.log('Tokeni on ===', token)
   try {
     const decodedToken = jwt.verify(token, process.env.SECRET)
@@ -42,20 +48,25 @@ blogsRouter.post('/', async (request, response, next) => {
       //console.log('Ei löytyny tokeneita...')
       return response.status(401).json({ error: 'token missing or invalid' })
     }
-    let user
-    if (request.body.user) {
-      user = await User.findById(request.body.user)
-      //console.log('found user by ID:', user)
+    //let user
+    if (body.user) {
+      const user = await User.findById(request.body.user)
+      if (user) {
+        const blog = new Blog(body)
+        const savedBlog = await blog.save()
+        user.blogs = user.blogs.concat(savedBlog._id)
+        await user.save()
+        response.status(201).json(savedBlog)
+      }
+      //if (!user && request.body.user.id) {
+      //user = await User.findById(request.body.user.id)
+      /*
+        const allUsers = await Blog.find({})
+        user = allUsers.find(user => {
+          return user.username === body.user.username
+        })*/
     }
-    const blog = new Blog(request.body)
-    const savedBlog = await blog.save()
-    //console.log('savedBlog:', savedBlog)
-    if (user) {
-      user.blogs = user.blogs.concat(savedBlog._id)
-      await user.save()
-      //console.log('user:', user)
-    }
-    response.status(201).json(savedBlog)
+    //console.log('found user by ID:', user)
   } catch(exception) {
     next(exception)
   }
