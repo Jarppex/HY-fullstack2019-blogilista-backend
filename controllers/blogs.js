@@ -6,7 +6,8 @@ const jwt = require('jsonwebtoken')
 blogsRouter.get('/', async (request, response, next) => {
   try {
     const blogs = await Blog
-      .find({}).populate('user', { username: 1, name: 1 })
+      .find({})
+      .populate('user', { username: 1, name: 1 })
     response.json(blogs)
   } catch(exception) {
     next(exception)
@@ -15,7 +16,9 @@ blogsRouter.get('/', async (request, response, next) => {
 
 blogsRouter.get('/:id', async (request, response, next) => {
   try {
-    const blog = await Blog.findById(request.params.id)
+    const blog = await Blog
+      .findById(request.params.id)
+      .populate('user', { username: 1, name: 1 })
     if (blog) {
       response.json(blog)
     } else {
