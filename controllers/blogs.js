@@ -77,14 +77,18 @@ blogsRouter.post('/', async (request, response, next) => {
 
 blogsRouter.delete('/:id', async (request, response, next) => {
   try {
-    const token = request.get('authorization')
-    //console.log('Tokeni on ===', token)
+    //console.log('request on ===', request)
+    /*let token = request.get('authorization')
+    if (!token) {
+      token = request.body.token
+    }
+    console.log('Tokeni on ===', token)
     const decodedToken = jwt.verify(token, process.env.SECRET)
     //console.log('Dekoodattu tokeni on ===', decodedToken)
     if (!token || !decodedToken.id) {
       //console.log('Ei löytyny tokeneita...')
       return response.status(401).json({ error: 'token missing or invalid' })
-    }
+    }*/
     await Blog.findByIdAndRemove(request.params.id)
     response.status(204).end()
   } catch (exception) {
