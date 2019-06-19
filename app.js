@@ -31,6 +31,12 @@ app.use('/api/comments', commentsRouter)
 app.use('/api/users', usersRouter)
 app.use('/api/login', loginRouter)
 
+if (config.NODE_ENV === 'test') {
+  const testingRouter = require('./controllers/testing')
+  app.use('/api/testing', testingRouter)
+  logger.info('using a testing router')
+}
+
 app.use(middleware.unknownEndpoint)
 app.use(middleware.errorHandler)
 
